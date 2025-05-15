@@ -44,8 +44,12 @@ class MarkdownGenerator {
 
   ///convert [data] to widgets
   ///[onTocList] can provider [Toc] list
-  List<Widget> buildWidgets(String data,
-      {ValueCallback<List<Toc>>? onTocList, MarkdownConfig? config}) {
+  List<Widget> buildWidgets(
+    String data, {
+    ValueCallback<List<Toc>>? onTocList,
+    ValueCallback<List<String>>? onPlainTextList,
+    MarkdownConfig? config,
+  }) {
     final mdConfig = config ?? MarkdownConfig.defaultConfig;
     final m.Document document = m.Document(
       extensionSet: extensionSet ?? m.ExtensionSet.gitHubFlavored,
@@ -56,6 +60,10 @@ class MarkdownGenerator {
     final regExp = splitRegExp ?? WidgetVisitor.defaultSplitRegExp;
     final List<String> lines = data.split(regExp);
     final List<m.Node> nodes = document.parseLines(lines);
+    // 新增纯文本列表回调
+    if (onPlainTextList != null) {
+      onPlainTextList(nodes.map((node) => node.textContent).toList());
+    }
     final List<Toc> tocList = [];
     final visitor = WidgetVisitor(
         config: mdConfig,
